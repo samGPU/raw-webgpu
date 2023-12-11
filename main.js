@@ -66,8 +66,14 @@ class Renderer {
     this.INDEX_BUFFER = this.createBuffer(this.INDICES, GPUBufferUsage.INDEX)
 
     // Create shader modules
-    this.VERT_MODULE = device.createShaderModule({code: vertShaderCode})
-    this.FRAG_MODULE = device.createShaderModule({code: fragShaderCode})
+    this.VERT_MODULE = device.createShaderModule({
+      label: 'vert-shader',
+      code: vertShaderCode
+    })
+    this.FRAG_MODULE = device.createShaderModule({
+      label: 'frag-shader',
+      code: fragShaderCode
+    })
 
     // Graphics Pipeline
     // Input Assembly
