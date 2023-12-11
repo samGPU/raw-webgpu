@@ -16,12 +16,7 @@ fn main(@location(0) inColor: vec3f) -> @location(0) vec4f {
     return vec4f(inColor, 1);
 }`
 
-// Get the canvas, resize it to fit the screen, init a context for use later
 const canvas = document.querySelector('.webgpu')
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-canvas.style.width = canvas.width;
-canvas.style.height = canvas.height;
 
 class Renderer {
   constructor(adapter, device) {
@@ -140,6 +135,16 @@ class Renderer {
     this.render()
   }
 
+  resize() {
+    this.DEPTH_TEXTURE = this.DEVICE.createTexture({
+      size: [canvas.width, canvas.height, 1],
+      dimension: '2d',
+      format: 'depth24plus-stencil8',
+      usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
+    })
+    this.DEPTH_TEXTURE_VIEW = this.DEPTH_TEXTURE.createView();
+  }
+
   render() {
     this.COLOR_TEXTURE = this.CONTEXT.getCurrentTexture();
     this.COLOR_TEXTURE_VIEW = this.COLOR_TEXTURE.createView();
@@ -236,5 +241,18 @@ function animate() {
     renderer.render()
   }
 }
+
+const observer = new ResizeObserver(entries => {
+  for(let entry of entries) {
+    const canvas = entry.target;
+    const width = entry.contentBoxSize[0].inlineSize;
+    const height = entry.contentBoxSize[0].blockSize;
+    canvas.width = Math.max(1, Math.min(width, renderer.DEVICE.limits.maxTextureDimension2D));
+    canvas.height = Math.max(1, Math.min(height, renderer.DEVICE.limits.maxTextureDimension2D));
+    renderer.resize();
+    renderer.render();
+  }
+})
+observer.observe(canvas)
 
 animate();
